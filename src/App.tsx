@@ -1,3 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
@@ -16,6 +21,10 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
   });
 
+  // Home state persistence
+  const [hasStarted, setHasStarted] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('portfolio_projects', JSON.stringify(projects));
   }, [projects]);
@@ -24,16 +33,47 @@ export default function App() {
     <div className="relative w-full h-screen bg-white">
       <AnimatePresence mode="wait">
         <Routes location={location}>
-          <Route path="/" element={<MainHome hasStarted={false} setHasStarted={() => {}} showCategories={true} setShowCategories={() => {}} onNavigate={(t) => t === 'work' && navigate('/work')} />} />
-          <Route path="/work" element={<WorkList projects={projects} onBack={() => navigate('/')} />} />
-          <Route path="/admin" element={<AdminPage projects={projects} onUpdate={setProjects} onBack={() => navigate('/')} />} />
+          <Route 
+            path="/" 
+            element={
+              <MainHome 
+                hasStarted={hasStarted}
+                setHasStarted={setHasStarted}
+                showCategories={showCategories}
+                setShowCategories={setShowCategories}
+                onNavigate={(target) => {
+                  if (target === 'work') navigate('/work');
+                }}
+              />
+            } 
+          />
+          <Route 
+            path="/work" 
+            element={
+              <WorkList 
+                projects={projects}
+                onBack={() => navigate('/')}
+              />
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <AdminPage 
+                projects={projects}
+                onUpdate={setProjects}
+                onBack={() => navigate('/')}
+              />
+            } 
+          />
         </Routes>
       </AnimatePresence>
 
-      {/* 오른쪽 하단 숨겨진 관리자 버튼 */}
+      {/* Hidden Admin Trigger */}
       <button 
         onClick={() => navigate('/admin')}
         className="fixed bottom-2 right-2 w-4 h-4 opacity-0 hover:opacity-10 z-50 cursor-default"
+        title="Admin"
       />
     </div>
   );

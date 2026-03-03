@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Project, Category } from '../types';
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
@@ -11,6 +11,66 @@ interface AdminPageProps {
 
 export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps) {
   const [localProjects, setLocalProjects] = useState<Project[]>(projects);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === '2026') {
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Incorrect password. Please try again.');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center p-6 font-sans">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl border border-black/5"
+        >
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold mb-2">Admin Access</h1>
+            <p className="text-sm text-gray-500">Please enter the password to continue.</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="grid gap-6">
+            <div className="grid gap-2">
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                autoFocus
+                className="w-full px-6 py-4 bg-gray-50 border border-transparent focus:border-black focus:bg-white rounded-2xl outline-none transition-all text-center text-lg tracking-widest"
+              />
+              {error && <p className="text-red-500 text-xs text-center mt-1">{error}</p>}
+            </div>
+            
+            <div className="flex gap-3">
+              <button 
+                type="button"
+                onClick={onBack}
+                className="flex-1 py-4 text-sm font-medium border border-black/10 rounded-2xl hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                className="flex-1 py-4 text-sm font-medium bg-black text-white rounded-2xl hover:bg-black/80 transition-all shadow-lg"
+              >
+                Enter
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
 
   const handleChange = (id: string, field: keyof Project, value: string) => {
     const next = localProjects.map(p => p.id === id ? { ...p, [field]: value } : p);
@@ -20,7 +80,7 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
   const handleAdd = (category: Category) => {
     const newProject: Project = {
       id: Math.random().toString(36).substr(2, 9),
-      name: '새 프로젝트',
+      name: 'New Project',
       category,
       thumbnailUrl: 'https://picsum.photos/seed/new/200/120'
     };
@@ -28,45 +88,116 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('정말 삭제하시겠습니까?')) {
+    if (window.confirm('Are you sure you want to delete this project?')) {
       setLocalProjects(localProjects.filter(p => p.id !== id));
     }
   };
 
   const handleSave = () => {
     onUpdate(localProjects);
-    alert('성공적으로 저장되었습니다.');
+    alert('Changes saved successfully.');
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#f8f8f8] p-6 md:p-12 font-sans text-black">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-[#f8f8f8] text-black p-6 md:p-12 font-sans"
+    >
       <div className="max-w-5xl mx-auto">
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-3xl font-bold">Project Manager</h1>
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Project Manager</h1>
+            <p className="text-sm text-gray-500">Manage your portfolio projects and categories.</p>
+          </div>
           <div className="flex gap-3">
-            <button onClick={onBack} className="flex items-center gap-2 px-5 py-2 border rounded-full hover:bg-white transition-all"><ArrowLeft size={16} /> Back</button>
-            <button onClick={handleSave} className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-full hover:bg-black/80 transition-all"><Save size={16} /> Save</button>
+            <button 
+              onClick={onBack}
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-black/10 rounded-full hover:bg-white transition-all shadow-sm"
+            >
+              <ArrowLeft size={16} />
+              Back to Site
+            </button>
+            <button 
+              onClick={handleSave}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-black text-white rounded-full hover:bg-black/80 transition-all shadow-md"
+            >
+              <Save size={16} />
+              Save Changes
+            </button>
           </div>
         </header>
 
         <div className="grid gap-10">
           {(['spatial', 'video'] as Category[]).map(cat => (
-            <section key={cat} className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-              <div className="px-8 py-5 bg-gray-50 border-b flex justify-between items-center">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">{cat === 'spatial' ? '공간 디자인' : '영상 제작'}</h2>
-                <button onClick={() => handleAdd(cat)} className="flex items-center gap-1 text-[10px] font-bold uppercase text-black hover:opacity-60"><Plus size={14} /> Add</button>
+            <section key={cat} className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden">
+              <div className="px-8 py-5 bg-gray-50 border-b border-black/5 flex justify-between items-center">
+                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
+                  {cat === 'spatial' ? 'Spatial Design' : 'Video Production'}
+                </h2>
+                <button 
+                  onClick={() => handleAdd(cat)}
+                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-black hover:text-black/60 transition-colors"
+                >
+                  <Plus size={14} />
+                  Add Project
+                </button>
               </div>
-              <div className="p-8 grid gap-8">
-                {localProjects.filter(p => p.category === cat).map(project => (
-                  <div key={project.id} className="grid md:grid-cols-[120px_1fr_auto] gap-6 items-center pb-6 border-b last:border-0">
-                    <img src={project.thumbnailUrl} className="w-full aspect-video object-cover rounded" referrerPolicy="no-referrer" />
-                    <div className="grid gap-2">
-                      <input type="text" value={project.name} onChange={(e) => handleChange(project.id, 'name', e.target.value)} className="text-lg font-medium border-b border-transparent focus:border-black outline-none" />
-                      <input type="text" value={project.thumbnailUrl} onChange={(e) => handleChange(project.id, 'thumbnailUrl', e.target.value)} className="text-xs text-gray-400 border-b border-transparent focus:border-black outline-none" />
+              
+              <div className="p-8">
+                <div className="grid gap-8">
+                  {localProjects.filter(p => p.category === cat).length === 0 ? (
+                    <div className="text-center py-12 text-gray-300 italic text-sm">
+                      No projects in this category.
                     </div>
-                    <button onClick={() => handleDelete(project.id)} className="p-2 text-gray-300 hover:text-red-500"><Trash2 size={18} /></button>
-                  </div>
-                ))}
+                  ) : (
+                    localProjects.filter(p => p.category === cat).map(project => (
+                      <div key={project.id} className="group relative grid md:grid-cols-[1fr_2fr_auto] gap-6 items-start pb-8 border-b border-gray-100 last:border-0 last:pb-0">
+                        <div className="w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-black/5">
+                          <img 
+                            src={project.thumbnailUrl} 
+                            alt={project.name} 
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        
+                        <div className="grid gap-4">
+                          <div className="grid gap-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Project Name</label>
+                            <input 
+                              type="text" 
+                              value={project.name}
+                              onChange={(e) => handleChange(project.id, 'name', e.target.value)}
+                              placeholder="Enter project name..."
+                              className="w-full text-lg font-medium border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
+                            />
+                          </div>
+                          <div className="grid gap-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Thumbnail URL</label>
+                            <input 
+                              type="text" 
+                              value={project.thumbnailUrl}
+                              onChange={(e) => handleChange(project.id, 'thumbnailUrl', e.target.value)}
+                              placeholder="https://..."
+                              className="w-full text-xs font-mono text-gray-500 border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex md:flex-col justify-end gap-2">
+                          <button 
+                            onClick={() => handleDelete(project.id)}
+                            className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            title="Delete Project"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </section>
           ))}
