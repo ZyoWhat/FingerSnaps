@@ -75,7 +75,7 @@ export default function MainHome({ onNavigate, showCategories, setShowCategories
                 duration: 0.8,
                 ease: [0.215, 0.61, 0.355, 1]
               }}
-              className="flex flex-col items-start gap-6 pointer-events-auto"
+              className="flex flex-col items-start gap-4 md:gap-6 pointer-events-auto px-8"
             >
               {categories.map((cat, index) => (
                 <motion.button
@@ -85,7 +85,7 @@ export default function MainHome({ onNavigate, showCategories, setShowCategories
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ x: 8 }}
-                  className="text-3xl md:text-4xl font-sans font-medium tracking-tight hover:text-black/40 transition-all text-left"
+                  className="text-4xl md:text-6xl font-sans font-medium tracking-tight hover:text-black/40 transition-all text-left"
                 >
                   {cat.label}
                 </motion.button>
