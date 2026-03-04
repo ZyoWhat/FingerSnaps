@@ -26,7 +26,7 @@ export default function WorkList({ projects, onBack }: WorkListProps) {
             transition={{ delay: idx * 0.05, duration: 0.6 }}
             className="group flex flex-col md:flex-row md:items-center justify-between border-b border-black/5 pb-6 md:pb-4 hover:border-black/20 transition-colors px-4 md:px-0"
           >
-            <span className="text-2xl md:text-3xl font-medium tracking-tight mb-4 md:mb-0">
+            <span className="text-lg md:text-xl font-medium tracking-tight mb-4 md:mb-0">
               {item.name}
             </span>
             

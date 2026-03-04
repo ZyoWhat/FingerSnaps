@@ -85,7 +85,7 @@ export default function MainHome({ onNavigate, showCategories, setShowCategories
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ x: 8 }}
-                  className="text-4xl md:text-6xl font-sans font-medium tracking-tight hover:text-black/40 transition-all text-left"
+                  className="text-lg md:text-2xl font-sans font-medium tracking-tight hover:text-black/40 transition-all text-left"
                 >
                   {cat.label}
                 </motion.button>
