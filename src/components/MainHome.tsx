@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface MainHomeProps {
@@ -11,15 +11,22 @@ interface MainHomeProps {
 }
 
 export default function MainHome({ onNavigate, showCategories, setShowCategories, hasStarted, setHasStarted }: MainHomeProps) {
-  const handleInteraction = () => {
+  const handleInteraction = (e?: React.MouseEvent | React.TouchEvent) => {
+    // Prevent default if it's a touch to avoid double triggers
+    if (e && 'touches' in e) {
+      // We don't necessarily want to preventDefault here as it might block the actual button clicks later
+    }
+    
     if (!hasStarted) {
       setHasStarted(true);
-      // Show categories after 1.5 seconds as requested
       setTimeout(() => {
         setShowCategories(true);
       }, 1500);
     } else {
-      setShowCategories(!showCategories);
+      // Only toggle if clicking the background, not the buttons
+      if (e && (e.target as HTMLElement).tagName !== 'BUTTON') {
+        setShowCategories(!showCategories);
+      }
     }
   };
 
@@ -41,15 +48,21 @@ export default function MainHome({ onNavigate, showCategories, setShowCategories
   ];
 
   return (
-    <div className="relative w-full h-screen bg-white overflow-hidden font-sans text-black">
-      {/* Spline Background Container - Watermark Removal Filter */}
+    <div 
+      className="relative w-full h-screen bg-white overflow-hidden font-sans text-black touch-none"
+      onClick={handleInteraction}
+      onTouchStart={(e) => {
+        // Simple touch start to trigger interaction on mobile
+        if (!hasStarted) handleInteraction();
+      }}
+    >
+      {/* Spline Background Container */}
       <div 
-        className="absolute inset-0 z-0 bg-white overflow-hidden transition-opacity duration-1000" 
+        className="absolute inset-0 z-0 bg-white overflow-hidden transition-opacity duration-1000 pointer-events-none" 
         style={{ 
           backgroundColor: '#ffffff',
-          opacity: showCategories ? 0.5 : 1,
-          height: 'calc(100vh + 100px)',
-          marginBottom: '-100px'
+          opacity: showCategories ? 0.4 : 1,
+          height: '100vh',
         }}
       >
         <iframe 
@@ -58,34 +71,38 @@ export default function MainHome({ onNavigate, showCategories, setShowCategories
           width='100%' 
           height='100%'
           title="Spline 3D Scene"
-          className="w-full h-full"
+          className="w-full h-full scale-110 md:scale-100"
           style={{ backgroundColor: '#ffffff', border: 'none' }}
         />
       </div>
 
-      {/* Categories Overlay - Center Vertical Left-Aligned */}
+      {/* Categories Overlay */}
       <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
         <AnimatePresence>
           {showCategories && (
             <motion.div 
-              initial={{ x: -20, opacity: 0 }}
+              initial={{ x: -30, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -20, opacity: 0 }}
+              exit={{ x: -30, opacity: 0 }}
               transition={{ 
                 duration: 0.8,
                 ease: [0.215, 0.61, 0.355, 1]
               }}
-              className="flex flex-col items-start gap-4 md:gap-6 pointer-events-auto px-8"
+              className="flex flex-col items-start gap-4 md:gap-8 pointer-events-auto px-10 w-full max-w-lg"
             >
               {categories.map((cat, index) => (
                 <motion.button
                   key={cat.id}
-                  onClick={() => onNavigate(cat.id as any)}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ x: 8 }}
-                  className="text-lg md:text-2xl font-sans font-medium tracking-tight hover:text-black/40 transition-all text-left"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigate(cat.id as any);
+                  }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 + 0.2 }}
+                  whileHover={{ x: 12 }}
+                  whileTap={{ scale: 0.95, x: 5 }}
+                  className="text-5xl sm:text-6xl md:text-7xl font-sans font-medium tracking-tighter hover:text-black/40 transition-all text-left leading-none"
                 >
                   {cat.label}
                 </motion.button>
@@ -101,10 +118,10 @@ export default function MainHome({ onNavigate, showCategories, setShowCategories
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
         >
-          <div className="text-[9px] uppercase tracking-[0.6em] text-black/20 font-light">
-            Click to interact
+          <div className="text-[10px] uppercase tracking-[0.8em] text-black/30 font-medium animate-pulse">
+            Tap to start
           </div>
         </motion.div>
       )}
