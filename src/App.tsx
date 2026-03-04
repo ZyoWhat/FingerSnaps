@@ -9,8 +9,22 @@ import { AnimatePresence } from 'motion/react';
 import MainHome from './components/MainHome';
 import WorkList from './components/WorkList';
 import AdminPage from './components/AdminPage';
-import { Project } from './types';
-import { INITIAL_PROJECTS } from './constants';
+import ProjectDetail from './components/ProjectDetail';
+import About from './components/About';
+import Connect from './components/Connect';
+import { Project, SEOData } from './types';
+import { INITIAL_PROJECTS, DEFAULT_SEO } from './constants';
+import seoDataJson from './data/seoData.json';
+import { useParams } from 'react-router-dom';
+
+function ProjectDetailWrapper({ projects, onBack }: { projects: Project[], onBack: () => void }) {
+  const { id } = useParams();
+  const project = projects.find(p => p.id === id);
+  
+  if (!project) return <div className="p-24 text-center">Project not found.</div>;
+  
+  return <ProjectDetail project={project} onBack={onBack} />;
+}
 
 export default function App() {
   const navigate = useNavigate();
@@ -21,6 +35,11 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
   });
 
+  const [seoData, setSeoData] = useState<SEOData>(() => {
+    const saved = localStorage.getItem('portfolio_seo');
+    return saved ? JSON.parse(saved) : (seoDataJson as SEOData || DEFAULT_SEO);
+  });
+
   // Home state persistence
   const [hasStarted, setHasStarted] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -28,6 +47,30 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('portfolio_projects', JSON.stringify(projects));
   }, [projects]);
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_seo', JSON.stringify(seoData));
+    // Update Document Title
+    document.title = seoData.title;
+    
+    // Update Meta Description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', seoData.description);
+
+    // Update Meta Keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', seoData.keywords);
+  }, [seoData]);
 
   return (
     <div className="relative w-full h-screen bg-white">
@@ -43,6 +86,8 @@ export default function App() {
                 setShowCategories={setShowCategories}
                 onNavigate={(target) => {
                   if (target === 'work') navigate('/work');
+                  if (target === 'about') navigate('/about');
+                  if (target === 'connect') navigate('/connect');
                 }}
               />
             } 
@@ -57,11 +102,30 @@ export default function App() {
             } 
           />
           <Route 
+            path="/work/:id" 
+            element={
+              <ProjectDetailWrapper 
+                projects={projects} 
+                onBack={() => navigate('/work')} 
+              />
+            } 
+          />
+          <Route 
+            path="/about" 
+            element={<About onBack={() => navigate('/')} />} 
+          />
+          <Route 
+            path="/connect" 
+            element={<Connect onBack={() => navigate('/')} />} 
+          />
+          <Route 
             path="/admin" 
             element={
               <AdminPage 
                 projects={projects}
                 onUpdate={setProjects}
+                seoData={seoData}
+                onUpdateSEO={setSeoData}
                 onBack={() => navigate('/')}
               />
             } 

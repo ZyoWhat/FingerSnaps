@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Project, Category } from '../types';
-import { Plus, Trash2, Save, ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react';
+import { Project, Category, SEOData } from '../types';
+import { Plus, Trash2, Save, ArrowLeft, Upload, Image as ImageIcon, Search } from 'lucide-react';
 
 interface AdminPageProps {
   projects: Project[];
   onUpdate: (updatedProjects: Project[]) => void;
+  seoData: SEOData;
+  onUpdateSEO: (updatedSEO: SEOData) => void;
   onBack: () => void;
 }
 
-export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps) {
+export default function AdminPage({ projects, onUpdate, seoData, onUpdateSEO, onBack }: AdminPageProps) {
   const [localProjects, setLocalProjects] = useState<Project[]>(projects);
+  const [localSEO, setLocalSEO] = useState<SEOData>(seoData);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -107,6 +110,7 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
 
   const handleSave = () => {
     onUpdate(localProjects);
+    onUpdateSEO(localSEO);
     alert('Changes saved successfully.');
   };
 
@@ -141,6 +145,48 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
         </header>
 
         <div className="grid gap-10">
+          {/* SEO Settings Section */}
+          <section className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden">
+            <div className="px-8 py-5 bg-gray-50 border-b border-black/5 flex justify-between items-center">
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
+                <Search size={14} />
+                Site SEO Settings
+              </h2>
+            </div>
+            <div className="p-8 grid gap-6">
+              <div className="grid gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Site Title (Browser Tab)</label>
+                <input 
+                  type="text" 
+                  value={localSEO.title}
+                  onChange={(e) => setLocalSEO({ ...localSEO, title: e.target.value })}
+                  placeholder="Enter site title..."
+                  className="w-full text-lg font-medium border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Meta Description (Search Results)</label>
+                <textarea 
+                  value={localSEO.description}
+                  onChange={(e) => setLocalSEO({ ...localSEO, description: e.target.value })}
+                  placeholder="Enter site description for search engines..."
+                  rows={2}
+                  className="w-full text-sm border border-gray-100 rounded-lg p-3 hover:border-gray-200 focus:border-black outline-none transition-all resize-none"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Keywords (Comma separated)</label>
+                <input 
+                  type="text" 
+                  value={localSEO.keywords}
+                  onChange={(e) => setLocalSEO({ ...localSEO, keywords: e.target.value })}
+                  placeholder="design, video, portfolio..."
+                  className="w-full text-sm border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
+                />
+              </div>
+            </div>
+          </section>
+
           {(['spatial', 'video'] as Category[]).map(cat => (
             <section key={cat} className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden">
               <div className="px-8 py-5 bg-gray-50 border-b border-black/5 flex justify-between items-center">
@@ -195,6 +241,18 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
                               className="w-full text-lg font-medium border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
                             />
                           </div>
+                          
+                          <div className="grid gap-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Description</label>
+                            <textarea 
+                              value={project.description || ''}
+                              onChange={(e) => handleChange(project.id, 'description', e.target.value)}
+                              placeholder="Enter project description..."
+                              rows={3}
+                              className="w-full text-sm border border-gray-100 rounded-lg p-3 hover:border-gray-200 focus:border-black outline-none transition-all resize-none"
+                            />
+                          </div>
+
                           <div className="grid gap-1.5">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Thumbnail URL</label>
                             <div className="flex gap-2">
@@ -215,6 +273,21 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
                                 />
                               </label>
                             </div>
+                          </div>
+
+                          <div className="grid gap-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Additional Images (URLs, one per line)</label>
+                            <textarea 
+                              value={project.additionalImages?.join('\n') || ''}
+                              onChange={(e) => {
+                                const urls = e.target.value.split('\n').filter(url => url.trim() !== '');
+                                const next = localProjects.map(p => p.id === project.id ? { ...p, additionalImages: urls } : p);
+                                setLocalProjects(next);
+                              }}
+                              placeholder="https://image1.jpg&#10;https://image2.jpg"
+                              rows={3}
+                              className="w-full text-xs font-mono text-gray-500 border border-gray-100 rounded-lg p-3 hover:border-gray-200 focus:border-black outline-none transition-all resize-none"
+                            />
                           </div>
                         </div>
 

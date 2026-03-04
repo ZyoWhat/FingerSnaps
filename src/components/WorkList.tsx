@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Project } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 interface WorkListProps {
   projects: Project[];
@@ -8,6 +9,7 @@ interface WorkListProps {
 }
 
 export default function WorkList({ projects, onBack }: WorkListProps) {
+  const navigate = useNavigate();
   const spatialProjects = projects.filter(p => p.category === 'spatial');
   const videoProjects = projects.filter(p => p.category === 'video');
 
@@ -89,7 +91,8 @@ export default function WorkList({ projects, onBack }: WorkListProps) {
                   layoutId={item.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center group cursor-default w-32 md:w-40"
+                  onClick={() => navigate(`/work/${item.id}`)}
+                  className="flex flex-col items-center group cursor-pointer w-32 md:w-40"
                 >
                   {/* Thumbnail Box (Top) */}
                   <div className="w-full aspect-square bg-gray-50 rounded-2xl shadow-sm border border-black/5 overflow-hidden relative mb-4 transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1">
