@@ -16,6 +16,7 @@ import { Project, SEOData } from './types';
 import { INITIAL_PROJECTS, DEFAULT_SEO } from './constants';
 import seoDataJson from './data/seoData.json';
 import { useParams } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 
 function ProjectDetailWrapper({ projects, onBack }: { projects: Project[], onBack: () => void }) {
   const { id } = useParams();
@@ -50,8 +51,21 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('portfolio_seo', JSON.stringify(seoData));
-    // Update Document Title
-    document.title = seoData.title;
+    
+    // Determine Page-Specific Title
+    let pageTitle = seoData.title;
+    const path = location.pathname;
+    
+    if (path === '/about') pageTitle = `About | ${seoData.title}`;
+    else if (path === '/connect') pageTitle = `Connect | ${seoData.title}`;
+    else if (path === '/work') pageTitle = `Work | ${seoData.title}`;
+    else if (path.startsWith('/work/')) {
+      const id = path.split('/').pop();
+      const project = projects.find(p => p.id === id);
+      if (project) pageTitle = `${project.name} | ${seoData.title}`;
+    }
+    
+    document.title = pageTitle;
     
     // Update Meta Description
     let metaDescription = document.querySelector('meta[name="description"]');
@@ -70,7 +84,23 @@ export default function App() {
       document.head.appendChild(metaKeywords);
     }
     metaKeywords.setAttribute('content', seoData.keywords);
-  }, [seoData]);
+
+    // Update Open Graph Tags
+    const updateOGTag = (property: string, content: string) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    updateOGTag('og:title', pageTitle);
+    updateOGTag('og:description', seoData.description);
+    updateOGTag('og:type', 'website');
+    updateOGTag('og:url', window.location.href);
+  }, [seoData, location.pathname, projects]);
 
   return (
     <div className="relative w-full h-screen bg-white">
@@ -139,6 +169,7 @@ export default function App() {
         className="fixed bottom-0 right-0 w-12 h-12 md:w-4 md:h-4 opacity-0 hover:opacity-10 z-50 cursor-default"
         title="Admin"
       />
+      <Analytics />
     </div>
   );
 }
