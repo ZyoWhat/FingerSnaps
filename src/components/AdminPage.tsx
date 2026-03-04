@@ -1,7 +1,37 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Project, Category, SEOData } from '../types';
-import { Plus, Trash2, Save, ArrowLeft, Upload, Image as ImageIcon, Search } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Upload, Image as ImageIcon, Search, BarChart3, Users, Eye, Globe } from 'lucide-react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from 'recharts';
+
+// Mock Analytics Data
+const MOCK_VISITOR_DATA = [
+  { date: '02-26', visitors: 45, views: 120 },
+  { date: '02-27', visitors: 52, views: 145 },
+  { date: '02-28', visitors: 38, views: 110 },
+  { date: '03-01', visitors: 65, views: 180 },
+  { date: '03-02', visitors: 82, views: 210 },
+  { date: '03-03', visitors: 95, views: 245 },
+  { date: '03-04', visitors: 110, views: 290 },
+];
+
+const MOCK_REFERRERS = [
+  { source: 'Direct', count: 450, percentage: 45 },
+  { source: 'Instagram', count: 280, percentage: 28 },
+  { source: 'Google', count: 150, percentage: 15 },
+  { source: 'LinkedIn', count: 80, percentage: 8 },
+  { source: 'Other', count: 40, percentage: 4 },
+];
 
 interface AdminPageProps {
   projects: Project[];
@@ -145,6 +175,130 @@ export default function AdminPage({ projects, onUpdate, seoData, onUpdateSEO, on
         </header>
 
         <div className="grid gap-10">
+          {/* Analytics Dashboard Section */}
+          <section className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden">
+            <div className="px-8 py-5 bg-gray-50 border-b border-black/5 flex justify-between items-center">
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
+                <BarChart3 size={14} />
+                Vercel Analytics Overview
+              </h2>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Live</span>
+              </div>
+            </div>
+            
+            <div className="p-8">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                <div className="p-4 bg-gray-50 rounded-xl border border-black/5">
+                  <div className="flex items-center gap-2 text-gray-400 mb-1">
+                    <Users size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Today's Visitors</span>
+                  </div>
+                  <div className="text-2xl font-bold">110</div>
+                  <div className="text-[10px] text-emerald-600 font-medium mt-1">+15.7% from yesterday</div>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-xl border border-black/5">
+                  <div className="flex items-center gap-2 text-gray-400 mb-1">
+                    <Eye size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Views</span>
+                  </div>
+                  <div className="text-2xl font-bold">2,450</div>
+                  <div className="text-[10px] text-emerald-600 font-medium mt-1">+8.2% this week</div>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-xl border border-black/5">
+                  <div className="flex items-center gap-2 text-gray-400 mb-1">
+                    <Globe size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Top Region</span>
+                  </div>
+                  <div className="text-2xl font-bold">Seoul, KR</div>
+                  <div className="text-[10px] text-gray-400 font-medium mt-1">62% of total traffic</div>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-xl border border-black/5">
+                  <div className="flex items-center gap-2 text-gray-400 mb-1">
+                    <BarChart3 size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Avg. Session</span>
+                  </div>
+                  <div className="text-2xl font-bold">2m 45s</div>
+                  <div className="text-[10px] text-emerald-600 font-medium mt-1">+12s improvement</div>
+                </div>
+              </div>
+
+              {/* Charts Grid */}
+              <div className="grid lg:grid-cols-[2fr_1fr] gap-8">
+                {/* Visitor Chart */}
+                <div className="h-[300px] w-full">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Visitor Trends (7 Days)</h3>
+                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={MOCK_VISITOR_DATA}>
+                      <defs>
+                        <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#000" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#000" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#999' }}
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#999' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          borderRadius: '12px', 
+                          border: 'none', 
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                          fontSize: '12px'
+                        }} 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="visitors" 
+                        stroke="#000" 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorVisitors)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Referrers List */}
+                <div>
+                  <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-6">Top Referrers</h3>
+                  <div className="grid gap-4">
+                    {MOCK_REFERRERS.map((ref) => (
+                      <div key={ref.source} className="grid gap-1.5">
+                        <div className="flex justify-between text-[11px] font-medium">
+                          <span>{ref.source}</span>
+                          <span className="text-gray-400">{ref.count} views</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${ref.percentage}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            className="h-full bg-black rounded-full"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* SEO Settings Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden">
             <div className="px-8 py-5 bg-gray-50 border-b border-black/5 flex justify-between items-center">
