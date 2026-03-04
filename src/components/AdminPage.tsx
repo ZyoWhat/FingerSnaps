@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Project, Category } from '../types';
-import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react';
 
 interface AdminPageProps {
   projects: Project[];
@@ -23,6 +23,18 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
     } else {
       setError('Incorrect password. Please try again.');
     }
+  };
+
+  const handleFileUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      handleChange(id, 'thumbnailUrl', base64String);
+    };
+    reader.readAsDataURL(file);
   };
 
   if (!isAuthenticated) {
@@ -153,13 +165,23 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
                   ) : (
                     localProjects.filter(p => p.category === cat).map(project => (
                       <div key={project.id} className="group relative grid md:grid-cols-[1fr_2fr_auto] gap-6 items-start pb-8 border-b border-gray-100 last:border-0 last:pb-0">
-                        <div className="w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-black/5">
+                        <div className="w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-black/5 relative group/img">
                           <img 
                             src={project.thumbnailUrl} 
                             alt={project.name} 
                             className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"
                           />
+                          <label className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white gap-2">
+                            <Upload size={24} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Replace Image</span>
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleFileUpload(project.id, e)}
+                            />
+                          </label>
                         </div>
                         
                         <div className="grid gap-4">
@@ -175,13 +197,24 @@ export default function AdminPage({ projects, onUpdate, onBack }: AdminPageProps
                           </div>
                           <div className="grid gap-1.5">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Thumbnail URL</label>
-                            <input 
-                              type="text" 
-                              value={project.thumbnailUrl}
-                              onChange={(e) => handleChange(project.id, 'thumbnailUrl', e.target.value)}
-                              placeholder="https://..."
-                              className="w-full text-xs font-mono text-gray-500 border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
-                            />
+                            <div className="flex gap-2">
+                              <input 
+                                type="text" 
+                                value={project.thumbnailUrl}
+                                onChange={(e) => handleChange(project.id, 'thumbnailUrl', e.target.value)}
+                                placeholder="https://..."
+                                className="flex-1 text-xs font-mono text-gray-500 border-b border-transparent hover:border-gray-200 focus:border-black py-1 outline-none transition-all"
+                              />
+                              <label className="cursor-pointer p-1 text-gray-400 hover:text-black transition-colors" title="Upload Image">
+                                <Upload size={16} />
+                                <input 
+                                  type="file" 
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(project.id, e)}
+                                />
+                              </label>
+                            </div>
                           </div>
                         </div>
 
