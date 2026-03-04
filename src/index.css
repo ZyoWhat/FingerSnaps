@@ -25,3 +25,20 @@ html, body, #root {
 * {
   scrollbar-width: none;
 }
+
+/* Hide Spline Watermark */
+canvas + a { 
+  display: none !important; 
+  opacity: 0 !important; 
+  pointer-events: none !important; 
+}
+.spline-watermark { 
+  display: none !important; 
+}
+#spline-watermark, 
+[class*="spline-watermark"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

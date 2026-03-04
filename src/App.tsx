@@ -72,7 +72,7 @@ export default function App() {
       {/* Hidden Admin Trigger */}
       <button 
         onClick={() => navigate('/admin')}
-        className="fixed bottom-2 right-2 w-4 h-4 opacity-0 hover:opacity-10 z-50 cursor-default"
+        className="fixed bottom-0 right-0 w-12 h-12 md:w-4 md:h-4 opacity-0 hover:opacity-10 z-50 cursor-default"
         title="Admin"
       />
     </div>
